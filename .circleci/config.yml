@@ -26,16 +26,11 @@ jobs:
       - run:
           name: "gradle build"
           command: gradle build
+      - setup_remote_docker:
+          version: 17.09.0-ce
       - run:
           name: "docker_deploy"
           command: |
             docker build -t alertjjm/cicd-demo:$CIRCLE_BUILD_NUM .
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             docker push alertjjm/cicd-demo:$CIRCLE_BUILD_NUM
-      - persist_to_workspace:
-          root: ~/repo
-          paths:
-            - result.zip
-      - store_artifacts:
-          path: ~/repo/result.zip
-          destination: build
