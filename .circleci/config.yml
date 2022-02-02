@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk
+    working_directory: ~/repo
+
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle.kts" }}
+            - v1-dependencies-
+
+      - run: gradle dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle.kts" }}
+
+      - run: gradle test
+      - run:
+          name: "gradle build"
+          command: gradle build
+      - setup_remote_docker:
+          version: 17.09.0-ce
+      - run:
+          name: "docker_deploy"
+          command: |
+            docker build -t alertjjm/cicd-demo:$CIRCLE_BUILD_NUM .
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push alertjjm/cicd-demo:$CIRCLE_BUILD_NUM
