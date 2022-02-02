@@ -31,7 +31,7 @@ jobs:
           command: |
             docker build -t alertjjm/cicd-demo:$TAG .
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            docker push alertjjm/cicd-demo:$TAG
+            docker push alertjjm/cicd-demo:$CIRCLE_BUILD_NUM
       - persist_to_workspace:
           root: ~/repo
           paths:
